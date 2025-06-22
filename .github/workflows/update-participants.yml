@@ -1,0 +1,34 @@
+name: Update Participants via Webhook
+
+on:
+  repository_dispatch:
+    types: [update_participants]
+
+jobs:
+  update-participants:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update participants.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PARTICIPANTS_DATA: ${{ github.event.client_payload.participants }}
+        run: |
+          # Создаем новый JSON с участниками
+          cat > participants.json << EOF
+          {
+            "participants": $PARTICIPANTS_DATA,
+            "lastUpdated": "$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")",
+            "totalParticipants": $(echo $PARTICIPANTS_DATA | jq length)
+          }
+          EOF
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add participants.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update participants via webhook - $(date)"
+          git push 

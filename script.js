@@ -52,67 +52,41 @@ document.addEventListener('DOMContentLoaded', () => {
         renderParticipants();
     }
 
-    // Save participants to GitHub repository
+    // Save participants via GitHub API using repository dispatch
     async function saveParticipantsToGitHub() {
         try {
-            // First, get the current file to get its SHA
-            const getResponse = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
-                headers: {
-                    'Authorization': `Bearer ${GITHUB_CONFIG.token}`,
-                    'Accept': 'application/vnd.github.v3+json'
-                }
-            });
-
-            let sha = null;
-            if (getResponse.ok) {
-                const fileData = await getResponse.json();
-                sha = fileData.sha;
-            } else if (getResponse.status !== 404) {
-                // If it's not a 404 error, something else is wrong
-                throw new Error(`Failed to get file info: ${getResponse.status}`);
-            }
-
-            // Prepare the new content
-            const data = {
-                participants: participants,
-                lastUpdated: new Date().toISOString(),
-                totalParticipants: participants.length
-            };
-
-            const content = JSON.stringify(data, null, 2);
-            // Proper base64 encoding for UTF-8 content
-            const encodedContent = btoa(encodeURIComponent(content).replace(/%([0-9A-F]{2})/g,
-                function toSolidBytes(match, p1) {
-                    return String.fromCharCode('0x' + p1);
-                }));
-
-            // Update the file
-            const updateResponse = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
-                method: 'PUT',
+            // Отправляем webhook через repository dispatch
+            const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/dispatches`, {
+                method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${GITHUB_CONFIG.token}`,
                     'Accept': 'application/vnd.github.v3+json',
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    message: `Update participants list - ${participants.length} participants`,
-                    content: encodedContent,
-                    sha: sha,
-                    branch: GITHUB_CONFIG.branch
+                    event_type: 'update_participants',
+                    client_payload: {
+                        participants: participants
+                    }
                 })
             });
 
-            if (updateResponse.ok) {
-                console.log('Участники успешно сохранены в GitHub');
-                showNotification('Список участников обновлен в репозитории');
+            if (response.ok) {
+                console.log('Webhook отправлен, участники будут обновлены через GitHub Actions');
+                showNotification('Список участников отправлен на обновление');
+                
+                // Ждем немного и перезагружаем данные
+                setTimeout(() => {
+                    loadParticipantsFromGitHub();
+                }, 3000);
             } else {
-                const errorData = await updateResponse.json();
+                const errorData = await response.json();
                 console.error('GitHub API Error:', errorData);
-                throw new Error(errorData.message || `HTTP ${updateResponse.status}`);
+                throw new Error(errorData.message || `HTTP ${response.status}`);
             }
         } catch (error) {
-            console.error('Ошибка сохранения в GitHub:', error);
-            showNotification('Ошибка сохранения в GitHub: ' + error.message, 'error');
+            console.error('Ошибка отправки webhook:', error);
+            showNotification('Ошибка отправки изменений: ' + error.message, 'error');
             
             // Fallback: download updated file
             downloadParticipantsFile();
