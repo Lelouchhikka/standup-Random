@@ -1,9 +1,10 @@
 {
   "participants": [
     "Ora",
-    "Sam"
+    "Sam",
+    "Olly"
   ],
-  "lastUpdated": "2025-06-22T19:57:45.436Z",
-  "totalParticipants": 2,
+  "lastUpdated": "2025-06-22T19:57:52.311Z",
+  "totalParticipants": 3,
   "updatedBy": "Vercel API"
 }
