@@ -12,8 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Vercel API Configuration
     const API_CONFIG = {
-        // URL вашего Vercel проекта
-        baseUrl: 'https://standup-random.vercel.app',
+        // URL вашего Vercel проекта (с git branch)
+        baseUrl: 'https://standup-random-git-main-lelouchhikkas-projects.vercel.app',
         endpoint: '/api/update-participants'
     };
 
