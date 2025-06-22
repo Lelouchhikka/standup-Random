@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "vercel dev",
-    "build": "echo 'No build step required'",
+    "build": "echo 'Build completed - static files in public directory'",
     "start": "vercel dev"
   },
   "keywords": [
