@@ -13,50 +13,43 @@ document.addEventListener('DOMContentLoaded', () => {
     // Vercel API Configuration
     const API_CONFIG = {
         // Замените на ваш URL после деплоя на Vercel
-        baseUrl: 'https://standup-randomizer-api-v2.vercel.app',
+        baseUrl: 'https://standup-randomizer-api-2024.vercel.app',
         endpoint: '/api/update-participants'
     };
 
-    // GitHub Configuration для загрузки данных
-    const GITHUB_CONFIG = {
-        owner: 'Lelouchhikka', // Замените на ваше имя пользователя
-        repo: 'standup-Random', // Замените на имя вашего репозитория
-        path: 'participants.json',
-        branch: 'main'
-    };
-
-    // Load participants from GitHub repository
-    async function loadParticipantsFromGitHub() {
+    // Load participants from Vercel API
+    async function loadParticipantsFromAPI() {
         try {
-            const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
-                headers: {
-                    'Accept': 'application/vnd.github.v3+json'
-                }
-            });
+            const response = await fetch(`${API_CONFIG.baseUrl}/api/get-participants`);
+            const result = await response.json();
 
-            if (response.ok) {
-                const data = await response.json();
-                const content = JSON.parse(atob(data.content));
-                participants = content.participants || [];
-                console.log(`Загружено ${participants.length} участников из GitHub`);
+            if (response.ok && result.success) {
+                participants = result.participants || [];
+                console.log(`Загружено ${participants.length} участников из API`);
                 showNotification(`Загружено ${participants.length} участников из репозитория`);
-            } else if (response.status === 404) {
-                console.log('Файл participants.json не найден в репозитории, начинаем с пустого списка');
-                participants = [];
             } else {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                throw new Error(result.error || 'Failed to load participants');
             }
         } catch (error) {
-            console.error('Ошибка загрузки из GitHub:', error);
-            showNotification('Ошибка загрузки из GitHub. Проверьте настройки.', 'error');
-            participants = [];
+            console.error('Ошибка загрузки участников:', error);
+            
+            // Fallback: загружаем из localStorage
+            const savedParticipants = localStorage.getItem('standup-participants');
+            if (savedParticipants) {
+                participants = JSON.parse(savedParticipants);
+                console.log(`Загружено ${participants.length} участников из localStorage (fallback)`);
+                showNotification(`Загружено ${participants.length} участников из локального хранилища (fallback)`);
+            } else {
+                participants = [];
+                console.log('Начинаем с пустого списка участников');
+            }
         }
         
         renderParticipants();
     }
 
     // Save participants via Vercel API
-    async function saveParticipantsToGitHub() {
+    async function saveParticipantsToAPI() {
         try {
             showNotification('Отправка изменений...', 'warning');
             
@@ -76,10 +69,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('Участники успешно обновлены через Vercel API');
                 showNotification(`Список участников обновлен! (${participants.length} участников)`);
                 
-                // Ждем немного и перезагружаем данные
-                setTimeout(() => {
-                    loadParticipantsFromGitHub();
-                }, 2000);
+                // Сохраняем в localStorage как backup
+                localStorage.setItem('standup-participants', JSON.stringify(participants));
             } else {
                 throw new Error(result.error || `HTTP ${response.status}`);
             }
@@ -87,32 +78,10 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Ошибка отправки через Vercel API:', error);
             showNotification('Ошибка отправки изменений: ' + error.message, 'error');
             
-            // Fallback: download updated file
-            downloadParticipantsFile();
+            // Fallback: сохраняем в localStorage
+            localStorage.setItem('standup-participants', JSON.stringify(participants));
+            showNotification('Изменения сохранены локально', 'warning');
         }
-    }
-
-    // Fallback function to download updated JSON file
-    function downloadParticipantsFile() {
-        const data = {
-            participants: participants,
-            lastUpdated: new Date().toISOString(),
-            totalParticipants: participants.length
-        };
-
-        const jsonString = JSON.stringify(data, null, 2);
-        const blob = new Blob([jsonString], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'participants.json';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        showNotification('Файл participants.json скачан. Загрузите его в репозиторий вручную.', 'warning');
     }
 
     function renderParticipants() {
@@ -138,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (name) {
             participants.push(name);
             participantInput.value = '';
-            await saveParticipantsToGitHub();
+            await saveParticipantsToAPI();
             renderParticipants();
             showNotification(`Участник "${name}" добавлен`);
         }
@@ -147,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function removeParticipant(index) {
         const removedName = participants[index];
         participants.splice(index, 1);
-        await saveParticipantsToGitHub();
+        await saveParticipantsToAPI();
         renderParticipants();
         showNotification(`Участник "${removedName}" удален`);
     }
@@ -227,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         participants = [...participants, ...newParticipants];
                     }
                     
-                    await saveParticipantsToGitHub();
+                    await saveParticipantsToAPI();
                     renderParticipants();
                     
                     showNotification(`Успешно импортировано ${data.participants.length} участников!`);
@@ -334,6 +303,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     fileInput.addEventListener('change', handleFileSelect);
 
-    // Initial load from GitHub
-    loadParticipantsFromGitHub();
+    // Initial load from API
+    loadParticipantsFromAPI();
 }); 
