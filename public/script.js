@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Vercel API Configuration
     const API_CONFIG = {
         // Замените на ваш URL после деплоя на Vercel
-        baseUrl: 'https://standup-randomizer-api.vercel.app',
+        baseUrl: 'https://standup-randomizer-api-v2.vercel.app',
         endpoint: '/api/update-participants'
     };
 
