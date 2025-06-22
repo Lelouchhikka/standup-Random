@@ -4,9 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const participantsList = document.getElementById('participants-list');
     const generateBtn = document.getElementById('generate-btn');
     const queueResult = document.getElementById('queue-result');
-    const exportBtn = document.getElementById('export-btn');
-    const importBtn = document.getElementById('import-btn');
-    const fileInput = document.getElementById('file-input');
 
     let participants = [];
 
@@ -145,85 +142,6 @@ document.addEventListener('DOMContentLoaded', () => {
         showNotification('Очередь сгенерирована!');
     }
 
-    function exportToJSON() {
-        if (participants.length === 0) {
-            showNotification('Нет участников для экспорта', 'warning');
-            return;
-        }
-
-        const data = {
-            participants: participants,
-            exportDate: new Date().toISOString(),
-            totalParticipants: participants.length
-        };
-
-        const jsonString = JSON.stringify(data, null, 2);
-        const blob = new Blob([jsonString], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `standup-participants-${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        showNotification('Список участников экспортирован в JSON файл');
-    }
-
-    function importFromJSON(file) {
-        const reader = new FileReader();
-        
-        reader.onload = async function(e) {
-            try {
-                const data = JSON.parse(e.target.result);
-                
-                if (data.participants && Array.isArray(data.participants)) {
-                    // Ask user if they want to replace or merge
-                    const action = confirm(
-                        `Найдено ${data.participants.length} участников.\n` +
-                        `Нажмите "OK" чтобы заменить текущий список,\n` +
-                        `или "Отмена" чтобы добавить к существующему списку.`
-                    );
-                    
-                    if (action) {
-                        // Replace current list
-                        participants = [...data.participants];
-                    } else {
-                        // Merge with current list
-                        const newParticipants = data.participants.filter(p => !participants.includes(p));
-                        participants = [...participants, ...newParticipants];
-                    }
-                    
-                    await saveParticipantsToAPI();
-                    renderParticipants();
-                    
-                    showNotification(`Успешно импортировано ${data.participants.length} участников!`);
-                } else {
-                    throw new Error('Неверный формат файла');
-                }
-            } catch (error) {
-                showNotification('Ошибка при импорте файла: ' + error.message, 'error');
-            }
-        };
-        
-        reader.readAsText(file);
-    }
-
-    function handleFileSelect(event) {
-        const file = event.target.files[0];
-        if (file) {
-            if (file.type === 'application/json' || file.name.endsWith('.json')) {
-                importFromJSON(file);
-            } else {
-                showNotification('Пожалуйста, выберите JSON файл', 'error');
-            }
-        }
-        // Reset file input
-        event.target.value = '';
-    }
-
     // Show notification
     function showNotification(message, type = 'success') {
         const notification = document.createElement('div');
@@ -295,14 +213,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     generateBtn.addEventListener('click', generateQueue);
     
-    exportBtn.addEventListener('click', exportToJSON);
-    
-    importBtn.addEventListener('click', () => {
-        fileInput.click();
-    });
-    
-    fileInput.addEventListener('change', handleFileSelect);
-
     // Initial load from API
     loadParticipantsFromAPI();
 }); 
