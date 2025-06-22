@@ -1,151 +1,187 @@
 # Stand-up Randomizer
 
-A modern, dark-themed web application for generating random speaking order for stand-up meetings. Built with vanilla HTML, CSS, and JavaScript with **GitHub API integration** for automatic file updates.
+Современное веб-приложение для генерации случайного порядка выступлений на стендап-встречах с интеграцией GitHub API через Vercel.
 
-## ✨ Features
+## 🚀 Особенности
 
-- **Add/Remove Participants**: Easily manage your team members list
-- **Random Queue Generation**: Generate a fair, random speaking order using Fisher-Yates shuffle algorithm
-- **GitHub API Integration**: Automatically updates `participants.json` file in your repository
-- **Modern Dark UI**: Beautiful neomorphic design with smooth animations
-- **Responsive Design**: Works perfectly on desktop and mobile devices
-- **No Dependencies**: Pure vanilla JavaScript - no frameworks or libraries required
-- **Automatic Commits**: Every change creates a Git commit in your repository
+- ✅ **Современный дизайн** с неоморфическим стилем и темной темой
+- ✅ **Безопасная интеграция** с GitHub через Vercel API
+- ✅ **Коллективное редактирование** - все пользователи видят изменения в реальном времени
+- ✅ **Автоматическое сохранение** в репозитории GitHub
+- ✅ **Экспорт/импорт** JSON файлов
+- ✅ **Адаптивный дизайн** для всех устройств
 
-## 🚀 GitHub API Integration
-
-This application automatically syncs with your GitHub repository:
-
-- **Loads participants** from `participants.json` in your repository
-- **Saves changes** directly to the repository via GitHub API
-- **Creates commits** for every change with descriptive messages
-- **Fallback system** downloads updated file if API fails
-
-### Setup Required
-
-Before using the GitHub API features, you need to configure the application:
-
-1. **Create a GitHub Personal Access Token** (see `GITHUB_SETUP.md`)
-2. **Update configuration** in `script.js` with your details
-3. **Deploy to GitHub Pages**
-
-See `GITHUB_SETUP.md` for detailed setup instructions.
-
-## 🎨 Design
-
-- **Dark Theme**: Modern dark color palette with purple accents
-- **Neomorphic Elements**: Soft shadows and depth effects
-- **Smooth Animations**: Hover effects and transitions throughout
-- **Typography**: Clean Inter font from Google Fonts
-- **Two-Column Layout**: Participants list on the left, generated queue on the right
-
-## 🚀 Usage
-
-1. **Add Participants**: Type a name in the input field and click "Add" or press Enter
-2. **Remove Participants**: Click the trash icon next to any participant's name
-3. **Generate Queue**: Click the "Generate Queue" button to create a random speaking order
-4. **Automatic Sync**: All changes are automatically saved to your GitHub repository
-
-## 📁 Project Structure
+## 🏗️ Архитектура
 
 ```
-generator/
-├── index.html              # Main HTML file
-├── style.css               # Dark theme styles with neomorphic effects
-├── script.js               # Application logic with GitHub API integration
-├── participants.json       # Initial participants list
-├── GITHUB_SETUP.md         # GitHub API setup instructions
-├── .gitignore              # Git ignore file
-└── README.md               # This file
+GitHub Pages (Frontend) → Vercel API → GitHub API → Repository
 ```
 
-## 🛠️ Technologies Used
+1. **Frontend** (GitHub Pages) - пользовательский интерфейс
+2. **Vercel API** - безопасный прокси для работы с GitHub API
+3. **GitHub API** - обновление файла participants.json
+4. **Repository** - хранение данных
 
-- **HTML5**: Semantic markup
-- **CSS3**: Modern styling with CSS Grid, Flexbox, and custom properties
-- **Vanilla JavaScript**: No frameworks or libraries
-- **GitHub API**: For automatic file updates
-- **Google Fonts**: Inter font family
+## 📋 Быстрый старт
 
-## 🎯 Key Features
+### 1. Клонируйте репозиторий
 
-### GitHub API Integration
-The app automatically syncs with your GitHub repository:
-- Loads initial data from `participants.json`
-- Saves all changes via GitHub API
-- Creates Git commits for tracking history
-- Provides fallback download if API fails
-
-### Random Generation
-Uses the Fisher-Yates shuffle algorithm for truly random and fair queue generation.
-
-### Responsive Design
-The layout adapts to different screen sizes:
-- Desktop: Two-column layout
-- Mobile: Single-column stacked layout
-
-### Accessibility
-- Semantic HTML structure
-- Keyboard navigation support
-- High contrast colors for readability
-
-## 🌐 Browser Support
-
-Works in all modern browsers that support:
-- ES6+ JavaScript features
-- CSS Grid and Flexbox
-- Fetch API
-- CSS custom properties (variables)
-
-## 📱 Mobile Friendly
-
-The application is fully responsive and works great on mobile devices with touch-friendly interface elements.
-
-## 🔧 Configuration
-
-### GitHub API Setup
-
-1. **Create Personal Access Token** in GitHub Settings
-2. **Update `script.js`** with your configuration:
-   ```javascript
-   const GITHUB_CONFIG = {
-       token: 'your-token-here',
-       owner: 'your-username',
-       repo: 'your-repo-name',
-       path: 'participants.json',
-       branch: 'main'
-   };
-   ```
-
-### Customization
-
-You can easily customize the appearance by modifying the CSS custom properties in the `:root` selector in `style.css`:
-
-```css
-:root {
-    --bg-color: #0f1419;
-    --primary-color: #6366f1;
-    --text-color: #e2e8f0;
-    /* ... more variables */
-}
+```bash
+git clone https://github.com/your-username/standup-randomizer.git
+cd standup-randomizer
 ```
 
-## 🔒 Security Notes
+### 2. Настройте Vercel API
 
-⚠️ **Important**: The GitHub token is visible in the client-side code. This approach is suitable for:
-- Personal projects
-- Demo applications
-- Non-sensitive data
+1. Перейдите на [vercel.com](https://vercel.com) и создайте аккаунт
+2. Импортируйте этот репозиторий в Vercel
+3. Добавьте переменную окружения:
+   - `GITHUB_TOKEN` = ваш Personal Access Token
 
-For production use, consider:
-- GitHub Actions with secrets
-- Backend API with authentication
-- Firebase or other BaaS solutions
+### 3. Обновите конфигурацию
 
-## 📄 License
+В файле `script.js` замените URL на ваш Vercel домен:
 
-This project is open source and available under the [MIT License](LICENSE).
+```javascript
+const API_CONFIG = {
+    baseUrl: 'https://your-project.vercel.app', // Ваш Vercel URL
+    endpoint: '/api/update-participants'
+};
+```
+
+### 4. Настройте GitHub репозиторий
+
+В файле `script.js` обновите настройки репозитория:
+
+```javascript
+const GITHUB_CONFIG = {
+    owner: 'your-username', // Ваше имя пользователя
+    repo: 'your-repo',      // Имя репозитория
+    path: 'participants.json',
+    branch: 'main'
+};
+```
+
+### 5. Включите GitHub Pages
+
+1. В настройках репозитория → Pages
+2. Выберите ветку `main` и папку `/ (root)`
+3. Сохраните настройки
+
+## 🔧 Настройка GitHub Token
+
+### Создание Personal Access Token
+
+1. Перейдите в [GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)](https://github.com/settings/tokens)
+2. Нажмите **"Generate new token (classic)"**
+3. Выберите права:
+   - ✅ `repo` (полный доступ к репозиториям)
+4. Скопируйте токен
+
+### Добавление токена в Vercel
+
+1. В настройках проекта на Vercel → **Settings → Environment Variables**
+2. Добавьте переменную:
+   - **Name**: `GITHUB_TOKEN`
+   - **Value**: ваш токен
+   - **Environment**: Production, Preview, Development
+
+## 📁 Структура проекта
+
+```
+standup-randomizer/
+├── api/
+│   └── update-participants.js    # Vercel serverless function
+├── index.html                    # Главная страница
+├── style.css                     # Стили
+├── script.js                     # Frontend логика
+├── participants.json             # Данные участников
+├── package.json                  # Конфигурация npm
+├── vercel.json                   # Конфигурация Vercel
+└── README.md                     # Документация
+```
+
+## 🎯 Использование
+
+1. **Откройте сайт** на GitHub Pages
+2. **Добавьте участников** через веб-интерфейс
+3. **Сгенерируйте очередь** для стендапа
+4. **Изменения автоматически сохраняются** в репозитории
+
+## 🔒 Безопасность
+
+- ✅ **Токен хранится только на сервере** (Vercel)
+- ✅ **Frontend не имеет доступа к секретам**
+- ✅ **CORS настроен для безопасных запросов**
+- ✅ **Валидация данных на сервере**
+
+## 🛠️ Разработка
+
+### Локальная разработка
+
+```bash
+# Установите Vercel CLI
+npm i -g vercel
+
+# Запустите локальный сервер
+vercel dev
+```
+
+### Переменные окружения для разработки
+
+Создайте файл `.env.local`:
+
+```env
+GITHUB_TOKEN=your_token_here
+GITHUB_OWNER=your_username
+GITHUB_REPO=your_repo
+GITHUB_BRANCH=main
+```
+
+## 🚀 Деплой
+
+### Автоматический деплой
+
+При пуше в репозиторий Vercel автоматически деплоит изменения.
+
+### Ручной деплой
+
+```bash
+vercel --prod
+```
+
+## 🐛 Устранение неполадок
+
+### Ошибка "Server configuration error"
+- Проверьте, что `GITHUB_TOKEN` добавлен в переменные окружения Vercel
+- Убедитесь, что токен имеет права на запись в репозиторий
+
+### Ошибка "Failed to update file"
+- Проверьте правильность `owner` и `repo` в настройках
+- Убедитесь, что репозиторий существует и доступен
+
+### CORS ошибки
+- Проверьте настройки CORS в `vercel.json`
+- Убедитесь, что домен GitHub Pages добавлен в разрешенные источники
+
+## 📝 Лицензия
+
+MIT License - см. файл LICENSE для подробностей.
+
+## 🤝 Вклад в проект
+
+1. Форкните репозиторий
+2. Создайте ветку для новой функции
+3. Внесите изменения
+4. Создайте Pull Request
+
+## 📞 Поддержка
+
+Если у вас есть вопросы или проблемы:
+- Создайте Issue в репозитории
+- Опишите проблему подробно
+- Приложите скриншоты если нужно
 
 ---
 
-**Enjoy your organized stand-up meetings with automatic GitHub sync!** 🎉 
+**Готово!** Теперь ваш Stand-up Randomizer работает безопасно через Vercel API! 🚀 

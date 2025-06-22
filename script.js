@@ -10,15 +10,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let participants = [];
 
-    // GitHub API Configuration
+    // Vercel API Configuration
+    const API_CONFIG = {
+        // Замените на ваш URL после деплоя на Vercel
+        baseUrl: 'https://standup-randomizer-api.vercel.app',
+        endpoint: '/api/update-participants'
+    };
+
+    // GitHub Configuration для загрузки данных
     const GITHUB_CONFIG = {
-        // ВНИМАНИЕ: В реальном проекте токен должен быть скрыт!
-        // Это демонстрационный токен - замените на свой
-        token: 'YOUR_GITHUB_TOKEN_HERE', // Замените на ваш токен
         owner: 'Lelouchhikka', // Замените на ваше имя пользователя
         repo: 'standup-Random', // Замените на имя вашего репозитория
         path: 'participants.json',
-        branch: 'master' // или 'master' в зависимости от вашей ветки
+        branch: 'main'
     };
 
     // Load participants from GitHub repository
@@ -26,7 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
                 headers: {
-                    'Authorization': `Bearer ${GITHUB_CONFIG.token}`,
                     'Accept': 'application/vnd.github.v3+json'
                 }
             });
@@ -52,40 +55,36 @@ document.addEventListener('DOMContentLoaded', () => {
         renderParticipants();
     }
 
-    // Save participants via GitHub API using repository dispatch
+    // Save participants via Vercel API
     async function saveParticipantsToGitHub() {
         try {
-            // Отправляем webhook через repository dispatch
-            const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/dispatches`, {
+            showNotification('Отправка изменений...', 'warning');
+            
+            const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoint}`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${GITHUB_CONFIG.token}`,
-                    'Accept': 'application/vnd.github.v3+json',
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    event_type: 'update_participants',
-                    client_payload: {
-                        participants: participants
-                    }
+                    participants: participants
                 })
             });
 
-            if (response.ok) {
-                console.log('Webhook отправлен, участники будут обновлены через GitHub Actions');
-                showNotification('Список участников отправлен на обновление');
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                console.log('Участники успешно обновлены через Vercel API');
+                showNotification(`Список участников обновлен! (${participants.length} участников)`);
                 
                 // Ждем немного и перезагружаем данные
                 setTimeout(() => {
                     loadParticipantsFromGitHub();
-                }, 3000);
+                }, 2000);
             } else {
-                const errorData = await response.json();
-                console.error('GitHub API Error:', errorData);
-                throw new Error(errorData.message || `HTTP ${response.status}`);
+                throw new Error(result.error || `HTTP ${response.status}`);
             }
         } catch (error) {
-            console.error('Ошибка отправки webhook:', error);
+            console.error('Ошибка отправки через Vercel API:', error);
             showNotification('Ошибка отправки изменений: ' + error.message, 'error');
             
             // Fallback: download updated file
