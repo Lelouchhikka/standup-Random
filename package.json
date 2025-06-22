@@ -1,5 +1,5 @@
 {
-  "name": "standup-randomizer-api",
+  "name": "standup-randomizer-api-v2",
   "version": "1.0.0",
   "description": "API for Stand-up Randomizer with GitHub integration",
   "main": "index.js",
