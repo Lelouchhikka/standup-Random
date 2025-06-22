@@ -1,0 +1,377 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
+:root {
+    --bg-color: #0f1419;
+    --card-bg: #1a1f2e;
+    --surface-bg: #252b3d;
+    --primary-color: #6366f1;
+    --primary-hover: #7c3aed;
+    --text-color: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --light-shadow: rgba(255, 255, 255, 0.05);
+    --dark-shadow: rgba(0, 0, 0, 0.3);
+    --danger-color: #ef4444;
+    --danger-hover: #dc2626;
+    --success-color: #10b981;
+    --border-color: #334155;
+    --input-bg: #1e293b;
+    --glow: rgba(99, 102, 241, 0.15);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, var(--bg-color) 0%, #1a1f2e 100%);
+    color: var(--text-color);
+    font-smoothing: antialiased;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: var(--card-bg);
+    border-radius: 20px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--text-color);
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--text-color) 0%, var(--primary-color) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+h2 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin: 2rem 0 1rem 0;
+    color: var(--text-color);
+    opacity: 0.9;
+}
+
+.add-participant-section {
+    margin-bottom: 2rem;
+}
+
+.input-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+#participant-input {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s ease;
+}
+
+#participant-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--glow);
+}
+
+#participant-input::placeholder {
+    color: var(--text-muted);
+}
+
+.json-controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    justify-content: center;
+}
+
+button {
+    border: none;
+    border-radius: 12px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s;
+}
+
+button:hover::before {
+    left: 100%;
+}
+
+#add-btn {
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, var(--surface-bg) 0%, var(--card-bg) 100%);
+    color: var(--primary-color);
+    font-size: 1rem;
+    min-width: 100px;
+    border: 1px solid var(--border-color);
+}
+
+#add-btn:hover {
+    color: var(--text-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 20px var(--glow);
+}
+
+#export-btn {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+    color: white;
+    font-size: 0.9rem;
+    border: 1px solid var(--success-color);
+}
+
+#export-btn:hover {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+    transform: translateY(-1px);
+}
+
+#import-btn {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, var(--surface-bg) 0%, var(--card-bg) 100%);
+    color: var(--text-color);
+    font-size: 0.9rem;
+    border: 1px solid var(--border-color);
+}
+
+#import-btn:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 20px var(--glow);
+}
+
+#generate-btn {
+    width: 100%;
+    padding: 1.25rem 2rem;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+    color: white;
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+}
+
+#generate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 35px rgba(99, 102, 241, 0.4);
+}
+
+#generate-btn:active {
+    transform: translateY(0);
+}
+
+/* Two-column layout */
+.columns-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.participants-section,
+.queue-section {
+    background: linear-gradient(135deg, var(--surface-bg) 0%, var(--card-bg) 100%);
+    padding: 1.5rem;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+#participants-list,
+#queue-result {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 2rem;
+}
+
+#participants-list li,
+#queue-result li {
+    padding: 1rem 1.5rem;
+    margin-bottom: 0.75rem;
+    background: linear-gradient(135deg, var(--card-bg) 0%, var(--surface-bg) 100%);
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+#participants-list li::before,
+#queue-result li::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+#participants-list li:hover,
+#queue-result li:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary-color);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+#participants-list li:hover::before,
+#queue-result li:hover::before {
+    opacity: 1;
+}
+
+.remove-btn {
+    background: transparent;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.remove-btn:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+    border-color: var(--danger-color);
+    transform: scale(1.1);
+}
+
+.remove-btn svg {
+    width: 18px;
+    height: 18px;
+    stroke: var(--text-secondary);
+    transition: stroke 0.2s ease;
+}
+
+.remove-btn:hover svg {
+    stroke: var(--danger-color);
+}
+
+#queue-result {
+    counter-reset: item;
+}
+
+#queue-result li {
+    position: relative;
+    padding-left: 3.5rem;
+}
+
+#queue-result li::after {
+    content: counter(item);
+    counter-increment: item;
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2rem;
+    height: 2rem;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--surface-bg);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 1rem 0.5rem;
+    }
+    
+    .container {
+        padding: 1.5rem;
+        border-radius: 16px;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    .input-group {
+        flex-direction: column;
+    }
+    
+    #add-btn {
+        min-width: auto;
+    }
+    
+    .json-controls {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .columns-container {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .participants-section,
+    .queue-section {
+        padding: 1rem;
+    }
+} 

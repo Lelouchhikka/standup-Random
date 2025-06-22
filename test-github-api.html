@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <h1>GitHub API Test</h1>
+    
+    <div class="test-section">
+        <h2>Конфигурация</h2>
+        <div id="config"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Тесты API</h2>
+        <button onclick="testConnection()">Тест подключения</button>
+        <button onclick="testReadFile()">Читать файл</button>
+        <button onclick="testWriteFile()">Записать файл</button>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // GitHub API Configuration (скопируйте из script.js)
+        const GITHUB_CONFIG = {
+            token: 'YOUR_GITHUB_TOKEN_HERE',
+            owner: 'Lelouchhikka',
+            repo: 'standup-Random',
+            path: 'participants.json',
+            branch: 'master'
+        };
+
+        // Показать конфигурацию
+        document.getElementById('config').innerHTML = `
+            <strong>Owner:</strong> ${GITHUB_CONFIG.owner}<br>
+            <strong>Repo:</strong> ${GITHUB_CONFIG.repo}<br>
+            <strong>Path:</strong> ${GITHUB_CONFIG.path}<br>
+            <strong>Branch:</strong> ${GITHUB_CONFIG.branch}<br>
+            <strong>Token:</strong> ${GITHUB_CONFIG.token.substring(0, 10)}...<br>
+        `;
+
+        function addResult(title, content, isError = false) {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `result ${isError ? 'error' : 'success'}`;
+            resultDiv.innerHTML = `<strong>${title}</strong>\n${content}`;
+            resultsDiv.appendChild(resultDiv);
+        }
+
+        async function testConnection() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}`, {
+                    headers: {
+                        'Authorization': `Bearer ${GITHUB_CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    addResult('✅ Подключение успешно', 
+                        `Репозиторий: ${data.name}\nОписание: ${data.description || 'Нет описания'}\nПриватный: ${data.private ? 'Да' : 'Нет'}`);
+                } else {
+                    addResult('❌ Ошибка подключения', 
+                        `HTTP ${response.status}: ${response.statusText}`, true);
+                }
+            } catch (error) {
+                addResult('❌ Ошибка сети', error.message, true);
+            }
+        }
+
+        async function testReadFile() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
+                    headers: {
+                        'Authorization': `Bearer ${GITHUB_CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const content = JSON.parse(atob(data.content));
+                    addResult('✅ Файл прочитан успешно', 
+                        `SHA: ${data.sha}\nРазмер: ${data.size} байт\nСодержимое:\n${JSON.stringify(content, null, 2)}`);
+                } else if (response.status === 404) {
+                    addResult('⚠️ Файл не найден', 
+                        'Файл participants.json не существует в репозитории. Это нормально для первого запуска.');
+                } else {
+                    addResult('❌ Ошибка чтения файла', 
+                        `HTTP ${response.status}: ${response.statusText}`, true);
+                }
+            } catch (error) {
+                addResult('❌ Ошибка чтения', error.message, true);
+            }
+        }
+
+        async function testWriteFile() {
+            try {
+                // Сначала попробуем прочитать существующий файл
+                const getResponse = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
+                    headers: {
+                        'Authorization': `Bearer ${GITHUB_CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                let sha = null;
+                if (getResponse.ok) {
+                    const fileData = await getResponse.json();
+                    sha = fileData.sha;
+                }
+
+                // Подготовим тестовые данные
+                const testData = {
+                    participants: ['Тестовый участник 1', 'Тестовый участник 2'],
+                    lastUpdated: new Date().toISOString(),
+                    totalParticipants: 2,
+                    test: true
+                };
+
+                const content = JSON.stringify(testData, null, 2);
+                const encodedContent = btoa(encodeURIComponent(content).replace(/%([0-9A-F]{2})/g,
+                    function toSolidBytes(match, p1) {
+                        return String.fromCharCode('0x' + p1);
+                    }));
+
+                // Запишем файл
+                const updateResponse = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${GITHUB_CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Test write from API',
+                        content: encodedContent,
+                        sha: sha,
+                        branch: GITHUB_CONFIG.branch
+                    })
+                });
+
+                if (updateResponse.ok) {
+                    const result = await updateResponse.json();
+                    addResult('✅ Файл записан успешно', 
+                        `Commit SHA: ${result.commit.sha}\nСообщение: ${result.commit.message}\nАвтор: ${result.commit.author.name}`);
+                } else {
+                    const errorData = await updateResponse.json();
+                    addResult('❌ Ошибка записи файла', 
+                        `HTTP ${updateResponse.status}: ${errorData.message}`, true);
+                }
+            } catch (error) {
+                addResult('❌ Ошибка записи', error.message, true);
+            }
+        }
+    </script>
+</body>
+</html> 

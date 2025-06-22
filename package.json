@@ -1,0 +1,25 @@
+{
+  "name": "standup-randomizer",
+  "version": "1.0.0",
+  "description": "A modern web application for generating random speaking order for stand-up meetings",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "standup",
+    "randomizer",
+    "meeting",
+    "queue",
+    "generator"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+} 

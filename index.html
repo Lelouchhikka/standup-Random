@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор очереди для стендапа</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Stand-up Randomizer</h1>
+
+        <section class="add-participant-section">
+            <h2>Добавить участника</h2>
+            <div class="input-group">
+                <input type="text" id="participant-input" placeholder="Имя участника">
+                <button id="add-btn">Добавить</button>
+            </div>
+            
+            <div class="json-controls">
+                <button id="export-btn">📤 Экспорт JSON</button>
+                <button id="import-btn">📥 Импорт JSON</button>
+                <input type="file" id="file-input" accept=".json" style="display: none;">
+            </div>
+            
+            <button id="generate-btn">Сгенерировать очередь!</button>
+        </section>
+
+        <div class="columns-container">
+            <section class="participants-section">
+                <h2>Участники</h2>
+                <ul id="participants-list">
+                    <!-- Участники будут добавляться сюда через JS -->
+                </ul>
+            </section>
+
+            <section class="queue-section">
+                <h2>Сегодняшняя очередь</h2>
+                <ol id="queue-result">
+                    <!-- Результат генерации будет здесь -->
+                </ol>
+            </section>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
