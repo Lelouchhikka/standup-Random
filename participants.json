@@ -1,8 +1,6 @@
 {
-  "participants": [
-    "123123"
-  ],
-  "lastUpdated": "2025-06-22T19:56:11.121Z",
-  "totalParticipants": 1,
+  "participants": [],
+  "lastUpdated": "2025-06-22T19:56:13.984Z",
+  "totalParticipants": 0,
   "updatedBy": "Vercel API"
 }
