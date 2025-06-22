@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "name": "standup-randomizer-api-2024",
+  "name": "standup-random",
   "builds": [
     {
       "src": "api/**/*.js",
