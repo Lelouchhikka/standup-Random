@@ -21,11 +21,6 @@
       "dest": "/public/$1"
     }
   ],
-  "functions": {
-    "api/update-participants.js": {
-      "maxDuration": 30
-    }
-  },
   "env": {
     "GITHUB_OWNER": "Lelouchhikka",
     "GITHUB_REPO": "standup-Random",
