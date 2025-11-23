@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error('Ошибка загрузки участников:', error);
-            
+
             // Fallback: загружаем из localStorage
             const savedParticipants = localStorage.getItem('standup-participants');
             if (savedParticipants) {
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('Начинаем с пустого списка участников');
             }
         }
-        
+
         renderParticipants();
     }
 
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function saveParticipantsToAPI() {
         try {
             showNotification('Отправка изменений...', 'warning');
-            
+
             const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoint}`, {
                 method: 'POST',
                 headers: {
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok && result.success) {
                 console.log('Участники успешно обновлены через Vercel API');
                 showNotification(`Список участников обновлен! (${participants.length} участников)`);
-                
+
                 // Сохраняем в localStorage как backup
                 localStorage.setItem('standup-participants', JSON.stringify(participants));
             } else {
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Ошибка отправки через Vercel API:', error);
             showNotification('Ошибка отправки изменений: ' + error.message, 'error');
-            
+
             // Fallback: сохраняем в localStorage
             localStorage.setItem('standup-participants', JSON.stringify(participants));
             showNotification('Изменения сохранены локально', 'warning');
@@ -86,14 +86,14 @@ document.addEventListener('DOMContentLoaded', () => {
         participants.forEach((participant, index) => {
             const li = document.createElement('li');
             li.textContent = participant;
-            
+
             const removeBtn = document.createElement('button');
             removeBtn.className = 'remove-btn';
             removeBtn.setAttribute('data-index', index);
-            
+
             // SVG icon for delete button
             removeBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`;
-            
+
             li.appendChild(removeBtn);
             participantsList.appendChild(li);
         });
@@ -124,16 +124,23 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const shuffledParticipants = [...participants];
-        
+        // Separate Sam from the rest
+        const participantsToShuffle = participants.filter(p => p !== "Sam");
+        const samExists = participants.includes("Sam");
+
         // Fisher-Yates Shuffle
-        for (let i = shuffledParticipants.length - 1; i > 0; i--) {
+        for (let i = participantsToShuffle.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [shuffledParticipants[i], shuffledParticipants[j]] = [shuffledParticipants[j], shuffledParticipants[i]];
+            [participantsToShuffle[i], participantsToShuffle[j]] = [participantsToShuffle[j], participantsToShuffle[i]];
+        }
+
+        // Add Sam to the end if he exists
+        if (samExists) {
+            participantsToShuffle.push("Sam");
         }
 
         queueResult.innerHTML = '';
-        shuffledParticipants.forEach(participant => {
+        participantsToShuffle.forEach(participant => {
             const li = document.createElement('li');
             li.textContent = participant;
             queueResult.appendChild(li);
@@ -147,13 +154,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const notification = document.createElement('div');
         notification.className = 'notification';
         notification.textContent = message;
-        
+
         const colors = {
             success: 'var(--success-color)',
             warning: '#f59e0b',
             error: 'var(--danger-color)'
         };
-        
+
         notification.style.cssText = `
             position: fixed;
             top: 20px;
@@ -167,9 +174,9 @@ document.addEventListener('DOMContentLoaded', () => {
             animation: slideIn 0.3s ease;
             max-width: 300px;
         `;
-        
+
         document.body.appendChild(notification);
-        
+
         setTimeout(() => {
             notification.style.animation = 'slideOut 0.3s ease';
             setTimeout(() => {
@@ -212,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     generateBtn.addEventListener('click', generateQueue);
-    
+
     // Initial load from API
     loadParticipantsFromAPI();
 }); 
