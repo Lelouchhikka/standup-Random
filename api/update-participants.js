@@ -1,5 +1,5 @@
 export default async function handler(req, res) {
-  // Настройка CORS для работы с GitHub Pages
+  // Настройка CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
@@ -34,43 +34,15 @@ export default async function handler(req, res) {
       });
     }
 
-    // Получаем секреты из переменных окружения Vercel
-    const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-    const OWNER = process.env.GITHUB_OWNER || 'Lelouchhikka';
-    const REPO = process.env.GITHUB_REPO || 'standup-Random';
-    const PATH = 'participants.json';
-    const BRANCH = process.env.GITHUB_BRANCH || 'main';
+    // Получаем конфигурацию JSONBin из переменных окружения Vercel
+    const JSONBIN_BIN_ID = process.env.JSONBIN_BIN_ID;
+    const JSONBIN_API_KEY = process.env.JSONBIN_API_KEY;
 
-    // Проверяем наличие токена
-    if (!GITHUB_TOKEN) {
-      console.error('GITHUB_TOKEN not found in environment variables');
+    // Проверяем наличие необходимых переменных
+    if (!JSONBIN_BIN_ID || !JSONBIN_API_KEY) {
+      console.error('JSONBin configuration not found in environment variables');
       return res.status(500).json({ 
-        error: 'Server configuration error. Please contact administrator.' 
-      });
-    }
-
-    // Получаем SHA текущего файла
-    const getResponse = await fetch(
-      `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${GITHUB_TOKEN}`,
-          'Accept': 'application/vnd.github.v3+json',
-          'User-Agent': 'Standup-Randomizer-API/1.0'
-        },
-      }
-    );
-
-    let sha = null;
-    if (getResponse.ok) {
-      const fileData = await getResponse.json();
-      sha = fileData.sha;
-    } else if (getResponse.status !== 404) {
-      // Если это не 404 ошибка, что-то пошло не так
-      const errorData = await getResponse.json();
-      console.error('Error getting file info:', errorData);
-      return res.status(500).json({ 
-        error: `Failed to get file info: ${errorData.message || getResponse.statusText}` 
+        error: 'Server configuration error. Please set JSONBIN_BIN_ID and JSONBIN_API_KEY in Vercel environment variables.' 
       });
     }
 
@@ -82,44 +54,34 @@ export default async function handler(req, res) {
       updatedBy: 'Vercel API'
     };
 
-    const content = Buffer.from(JSON.stringify(data, null, 2)).toString('base64');
-
-    // Обновляем файл через GitHub API
+    // Обновляем bin через JSONBin API
     const updateResponse = await fetch(
-      `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`,
+      `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`,
       {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${GITHUB_TOKEN}`,
-          'Accept': 'application/vnd.github.v3+json',
           'Content-Type': 'application/json',
-          'User-Agent': 'Standup-Randomizer-API/1.0'
+          'X-Master-Key': JSONBIN_API_KEY
         },
-        body: JSON.stringify({
-          message: `Update participants list via API - ${participants.length} participants`,
-          content: content,
-          sha: sha,
-          branch: BRANCH
-        }),
+        body: JSON.stringify(data)
       }
     );
 
     if (updateResponse.ok) {
       const result = await updateResponse.json();
-      console.log(`Successfully updated participants.json. Commit: ${result.commit.sha}`);
+      console.log(`Successfully updated JSONBin with ${participants.length} participants`);
       
       return res.status(200).json({ 
         success: true,
         message: `Successfully updated ${participants.length} participants`,
-        commitSha: result.commit.sha,
         updatedAt: data.lastUpdated
       });
     } else {
-      const errorData = await updateResponse.json();
-      console.error('GitHub API Error:', errorData);
+      const errorData = await updateResponse.text();
+      console.error('JSONBin API Error:', errorData);
       
       return res.status(500).json({ 
-        error: `Failed to update file: ${errorData.message || updateResponse.statusText}`,
+        error: `Failed to update data: ${updateResponse.statusText}`,
         details: errorData
       });
     }
