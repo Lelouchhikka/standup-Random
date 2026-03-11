@@ -20,6 +20,15 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Проверяем наличие Vercel KV конфигурации
+    if (!process.env.KV_REST_API_URL || !process.env.KV_REST_API_TOKEN) {
+      console.error('Vercel KV is not configured. Please create and connect a KV database.');
+      return res.status(500).json({ 
+        error: 'Vercel KV is not configured. Please follow the setup instructions in VERCEL_KV_SETUP.md',
+        setupRequired: true
+      });
+    }
+
     const { participants } = req.body;
     
     // Валидация входных данных
@@ -57,9 +66,11 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Unexpected error:', error);
+    console.error('Error details:', error.message, error.stack);
     return res.status(500).json({ 
       error: 'Internal server error. Please try again later.',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      message: error.message,
+      hint: 'Make sure Vercel KV database is created and connected to this project'
     });
   }
 } 
