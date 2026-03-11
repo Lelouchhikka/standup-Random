@@ -1,3 +1,5 @@
+чке6гаенimport { kv } from '@vercel/kv';
+
 export default async function handler(req, res) {
   // Настройка CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -34,19 +36,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // Получаем конфигурацию JSONBin из переменных окружения Vercel
-    const JSONBIN_BIN_ID = process.env.JSONBIN_BIN_ID;
-    const JSONBIN_API_KEY = process.env.JSONBIN_API_KEY;
-
-    // Проверяем наличие необходимых переменных
-    if (!JSONBIN_BIN_ID || !JSONBIN_API_KEY) {
-      console.error('JSONBin configuration not found in environment variables');
-      return res.status(500).json({ 
-        error: 'Server configuration error. Please set JSONBIN_BIN_ID and JSONBIN_API_KEY in Vercel environment variables.' 
-      });
-    }
-
-    // Формируем новый JSON
+    // Формируем данные для сохранения
     const data = {
       participants: participants,
       lastUpdated: new Date().toISOString(),
@@ -54,37 +44,16 @@ export default async function handler(req, res) {
       updatedBy: 'Vercel API'
     };
 
-    // Обновляем bin через JSONBin API
-    const updateResponse = await fetch(
-      `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Master-Key': JSONBIN_API_KEY
-        },
-        body: JSON.stringify(data)
-      }
-    );
-
-    if (updateResponse.ok) {
-      const result = await updateResponse.json();
-      console.log(`Successfully updated JSONBin with ${participants.length} participants`);
-      
-      return res.status(200).json({ 
-        success: true,
-        message: `Successfully updated ${participants.length} participants`,
-        updatedAt: data.lastUpdated
-      });
-    } else {
-      const errorData = await updateResponse.text();
-      console.error('JSONBin API Error:', errorData);
-      
-      return res.status(500).json({ 
-        error: `Failed to update data: ${updateResponse.statusText}`,
-        details: errorData
-      });
-    }
+    // Сохраняем в Vercel KV (Redis)
+    await kv.set('standup-participants', data);
+    
+    console.log(`Successfully updated Vercel KV with ${participants.length} participants`);
+    
+    return res.status(200).json({ 
+      success: true,
+      message: `Successfully updated ${participants.length} participants`,
+      updatedAt: data.lastUpdated
+    });
 
   } catch (error) {
     console.error('Unexpected error:', error);
