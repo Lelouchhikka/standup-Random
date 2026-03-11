@@ -85,7 +85,7 @@ standup-randomizer/
 │   ├── index.html                # Главная страница
 │   ├── style.css                 # Стили
 │   └── script.js                 # Frontend логика
-├── package.json                  # Зависимости (@vercel/kv)
+├── package.json                  # Зависимости (redis)
 ├── vercel.json                   # Конфигурация Vercel
 ├── VERCEL_KV_SETUP.md           # Инструкция настройки
 └── README.md                     # Документация

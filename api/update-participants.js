@@ -1,4 +1,16 @@
-import { kv } from '@vercel/kv';
+import { createClient } from 'redis';
+
+let redis = null;
+
+async function getRedisClient() {
+  if (!redis) {
+    redis = createClient({
+      url: process.env.REDIS_URL
+    });
+    await redis.connect();
+  }
+  return redis;
+}
 
 export default async function handler(req, res) {
   // Настройка CORS
@@ -20,9 +32,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Проверяем наличие Vercel KV конфигурации
-    if (!process.env.KV_REST_API_URL || !process.env.KV_REST_API_TOKEN) {
-      console.error('Vercel KV is not configured. Please create and connect a KV database.');
+    // Проверяем наличие REDIS_URL
+    if (!process.env.REDIS_URL) {
+      console.error('REDIS_URL is not configured. Please create and connect a KV database.');
       return res.status(500).json({ 
         error: 'Vercel KV is not configured. Please follow the setup instructions in VERCEL_KV_SETUP.md',
         setupRequired: true
@@ -53,8 +65,9 @@ export default async function handler(req, res) {
       updatedBy: 'Vercel API'
     };
 
-    // Сохраняем в Vercel KV (Redis)
-    await kv.set('standup-participants', data);
+    // Сохраняем в Redis
+    const client = await getRedisClient();
+    await client.set('standup-participants', JSON.stringify(data));
     
     console.log(`Successfully updated Vercel KV with ${participants.length} participants`);
     
