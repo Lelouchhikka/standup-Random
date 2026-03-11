@@ -108,14 +108,20 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Separate Sam from the rest
-        const participantsToShuffle = participants.filter(p => p !== "Sam");
+        // Separate Olly and Sam from the rest
+        const participantsToShuffle = participants.filter(p => p !== "Sam" && p !== "Olly");
         const samExists = participants.includes("Sam");
+        const ollyExists = participants.includes("Olly");
 
         // Fisher-Yates Shuffle
         for (let i = participantsToShuffle.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [participantsToShuffle[i], participantsToShuffle[j]] = [participantsToShuffle[j], participantsToShuffle[i]];
+        }
+
+        // Add Olly as second to last if he exists
+        if (ollyExists) {
+            participantsToShuffle.push("Olly");
         }
 
         // Add Sam to the end if he exists
