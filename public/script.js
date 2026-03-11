@@ -22,24 +22,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok && result.success) {
                 participants = result.participants || [];
-                console.log(`Загружено ${participants.length} участников из API`);
-                showNotification(`Загружено ${participants.length} участников из репозитория`);
+                console.log(`Загружено ${participants.length} участников из GitHub`);
+                showNotification(`Загружено ${participants.length} участников`);
             } else {
                 throw new Error(result.error || 'Failed to load participants');
             }
         } catch (error) {
             console.error('Ошибка загрузки участников:', error);
-
-            // Fallback: загружаем из localStorage
-            const savedParticipants = localStorage.getItem('standup-participants');
-            if (savedParticipants) {
-                participants = JSON.parse(savedParticipants);
-                console.log(`Загружено ${participants.length} участников из localStorage (fallback)`);
-                showNotification(`Загружено ${participants.length} участников из локального хранилища (fallback)`);
-            } else {
-                participants = [];
-                console.log('Начинаем с пустого списка участников');
-            }
+            participants = [];
+            showNotification('Не удалось загрузить участников. Начинаем с пустого списка.', 'warning');
         }
 
         renderParticipants();
@@ -63,21 +54,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
 
             if (response.ok && result.success) {
-                console.log('Участники успешно обновлены через Vercel API');
+                console.log('Участники успешно обновлены в GitHub через Vercel API');
                 showNotification(`Список участников обновлен! (${participants.length} участников)`);
-
-                // Сохраняем в localStorage как backup
-                localStorage.setItem('standup-participants', JSON.stringify(participants));
             } else {
                 throw new Error(result.error || `HTTP ${response.status}`);
             }
         } catch (error) {
             console.error('Ошибка отправки через Vercel API:', error);
             showNotification('Ошибка отправки изменений: ' + error.message, 'error');
-
-            // Fallback: сохраняем в localStorage
-            localStorage.setItem('standup-participants', JSON.stringify(participants));
-            showNotification('Изменения сохранены локально', 'warning');
         }
     }
 
