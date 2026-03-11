@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
             [participantsToShuffle[i], participantsToShuffle[j]] = [participantsToShuffle[j], participantsToShuffle[i]];
         }
 
-        // Add Olly as second to last if he exists
+        // Add Olly as second to last if he exist
         if (ollyExists) {
             participantsToShuffle.push("Olly");
         }
